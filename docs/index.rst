@@ -7,18 +7,18 @@ Prospector - Python Static Analysis
 About
 -----
 
-.. image:: https://pypip.in/v/prospector/badge.png
+.. image:: https://img.shields.io/pypi/v/prospector.svg
    :target: https://pypi.python.org/pypi/prospector
    :alt: Latest Version of Prospector
 .. image:: https://travis-ci.org/landscapeio/prospector.png?branch=master
    :target: https://travis-ci.org/landscapeio/prospector
    :alt: Build Status
-.. image:: https://landscape.io/github/landscapeio/prospector/master/landscape.png
+.. image:: https://landscape.io/github/landscapeio/prospector/master/landscape.png?style=flat
    :target: https://landscape.io/github/landscapeio/prospector/master
    :alt: Code Health
-.. image:: https://coveralls.io/repos/landscapeio/prospector/badge.png
+.. image:: https://img.shields.io/coveralls/landscapeio/prospector.svg?style=flat
    :target: https://coveralls.io/r/landscapeio/prospector
-   :alt: Text Coverage
+   :alt: Test Coverage
 
 
 Prospector is a tool to analyse Python code and output information about errors, potential problems, convention violations and complexity.
@@ -89,6 +89,7 @@ There is currently support for the following frameworks:
 
 - `Celery <https://github.com/landscapeio/pylint-celery>`_
 - `Django <https://github.com/landscapeio/pylint-django>`_
+- `Flask <https://github.com/jschaf/pylint-flask>`_
 
 If you have a suggestion for another framework or library which should be supported, 
 please `add an issue <https://github.com/landscapeio/prospector/issues>`_ 
@@ -139,6 +140,7 @@ Contents:
 
    usage
    profiles
+   suppression
    supported_tools
    contrib
 

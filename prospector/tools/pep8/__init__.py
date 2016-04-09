@@ -1,9 +1,17 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 import os
 import re
-from pep8 import StyleGuide, BaseReport, register_check, DEFAULT_CONFIG, PROJECT_CONFIG
+from pep8 import StyleGuide, BaseReport, register_check, PROJECT_CONFIG
 from pep8ext_naming import NamingChecker
+
+try:
+    # for pep8 <= 1.5.7
+    from pep8 import DEFAULT_CONFIG as USER_CONFIG
+except ImportError:
+    # for pep8 >= 1.6.0
+    from pep8 import USER_CONFIG
 
 from prospector.message import Location, Message
 from prospector.tools.base import ToolBase
@@ -98,7 +106,7 @@ class Pep8Tool(ToolBase):
             use_config = True
 
             paths = [os.path.join(found_files.rootpath, name) for name in PROJECT_CONFIG]
-            paths.append(DEFAULT_CONFIG)
+            paths.append(USER_CONFIG)
             ext_loc = prospector_config.external_config_location('pep8')
             if ext_loc is not None:
                 paths = [ext_loc] + paths
@@ -124,9 +132,9 @@ class Pep8Tool(ToolBase):
             # This means that we don't have existing config to use.
             # Make sure pep8's code ignores are fully reset to zero before
             # adding prospector-flavoured configuration.
-            # pylint: disable=W0201
-            self.checker.select = ()
-            self.checker.ignore = prospector_config.get_disabled_messages('pep8')
+            # pylint: disable=attribute-defined-outside-init
+            self.checker.options.select = ()
+            self.checker.options.ignore = tuple(prospector_config.get_disabled_messages('pep8'))
 
             if 'max-line-length' in prospector_config.tool_options('pep8'):
                 self.checker.options.max_line_length = \
@@ -140,7 +148,7 @@ class Pep8Tool(ToolBase):
         if max_line_length is not None:
             self.checker.options.max_line_length = max_line_length
 
-        return configured_by
+        return configured_by, []
 
     def run(self, _):
         report = self.checker.check_files()

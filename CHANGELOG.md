@@ -1,5 +1,105 @@
 Prospector Changelog
 =======
+# Version 0.11.7
+* Wrapping all tools so that none can directly write to stdout/stderr, as this breaks the output format for things like json. Instead, it is captured and optionally included as a regular message.
+
+# Version 0.11.6
+* Yet more 'dodgy' encoding problem avoidance
+
+# Version 0.11.5
+* Including forgotten 'python-targets' value in profile serialization
+
+# Version 0.11.4
+* Prevented 'dodgy' tool from trying to analyse compressed text data
+
+# Version 0.11.3
+* Fixed encoding of file contents handling by tool "dodgy" under Python3
+
+## Version 0.11.2
+* Fixed a file encoding detection issue when running under Python3
+* If a pylint plugin is specified in a .pylintrc file which cannot be loaded, prospector will now carry on with a warning rather than simply crash
+
+## Version 0.11.1
+* [#147](https://github.com/landscapeio/prospector/issues/147) Fixed crash when trying to load pylint configuration files in pylint 1.5
+
+## Version 0.11
+* Compatability fixes to work with pylint>=1.5
+* McCabe tool now reports correct line and character number for syntax errors (and therefore gets blended if pylint etc detects such an error)
+* Autodetect of libraries will now not search inside virtualenvironments
+* [#142](https://github.com/landscapeio/prospector/pull/142) better installation documentation in README (thanks [@ExcaliburZero](https://github.com/ExcaliburZero))
+* [#141](https://github.com/landscapeio/prospector/issues/141) profile-validator no longer complains about member-warnings (thanks [@alefteris](https://github.com/alefteris))
+* [#140](https://github.com/landscapeio/prospector/pull/140) emacs formatter includes character position (thanks [@philroberts](https://github.com/philroberts))
+* [#138](https://github.com/landscapeio/prospector/pull/138) docs fixed for 'output-format' profile option (thanks [@faulkner](https://github.com/faulkner))
+* [#137](https://github.com/landscapeio/prospector/pull/137) fixed various formatting issues in docs (thanks [@danstender](https://github.com/danstender))
+* [#132](https://github.com/landscapeio/prospector/issues/132) Added support for custom flask linting thanks to the awesome [pylint-flask](https://github.com/jschaf/pylint-flask) plugin by [jschaf](https://github.com/jschaf)
+* [#131](https://github.com/landscapeio/prospector/pull/131), [#134](https://github.com/landscapeio/prospector/pull/134) Custom pylint plugins are now loaded from existing .pylintrc files if present (thanks [@kaidokert](https://github.com/kaidokert) and [@antoviaque](https://github.com/antoviaque))
+
+## Version 0.10.2
+* Added information to summary to explain what external configuration was used (if any) to configure the underlying tools
+* Fixed supression-token search to use (or at least guess) correct file encoding
+
+## Version 0.10.1
+* [#116](https://github.com/landscapeio/prospector/issues/116) Comparison failed between messages with numeric values for character and those with a `None` value (thanks @smspillaz)
+* [#118](https://github.com/landscapeio/prospector/issues/118) Unified output of formatters to have correct output of str rather than bytes (thanks @prophile)
+* [#115](https://github.com/landscapeio/prospector/issues/115) Removed argparse as an explicit dependency as only Python 2.7+ is supported now
+
+## Version 0.10
+* [#112](https://github.com/landscapeio/prospector/issues/112) Profiles will now also be autoloaded from directories named `.prospector`.
+* [#32](https://github.com/landscapeio/prospector/issues/32) and [#108](https://github.com/landscapeio/prospector/pull/108) Added a new 'xunit' output formatter for tools and services which integrate with this format (thanks to [lfrodrigues](https://github.com/lfrodrigues))
+* Added a new built-in profile called 'flake8' for people who want to mimic the behaviour of 'flake8' using prospector.
+
+## Version 0.9.10
+* The profile validator would load any file whose name was a subset of '.prospector.yaml' due to using the incorrect comparison operator.
+* Fixing a crash when using an empty `ignore-patterns` list in a profile.
+* Fixing a crash when a profile is not valid YAML at all.
+* [#105](https://github.com/landscapeio/prospector/pull/105) pyflakes was not correctly ignoring errors.
+
+## Version 0.9.9
+* pep8.py 1.6.0 added new messages, which are now in prospector's built-in profiles
+
+## Version 0.9.8
+* Fixing a crash when using pep8 1.6.0 due to the pep8 tool renaming something that Prospector uses
+
+## Version 0.9.7
+* [#104](https://github.com/landscapeio/prospector/issues/104) The previous attempt at normalising bytestrings and unicode in Python 2 was clumsily done and a bit broken. It is hopefully now using the correct voodoo incantations to get characters from one place to another.
+* The blender combinations were not updated to use the new PyFlakes error codes; this is now fixed.
+
+## Version 0.9.6
+* The profile validator tool was always outputting absolute paths in messages. This is now fixed.
+* The "# NOQA" checking was using absolute paths incorrectly, which meant the message locations (with relative paths) did not match up and no messages were suppressed.
+
+## Version 0.9.5
+* Fixed a problem with profile serialising where it was using the incorrect dict value for strictness
+
+## Version 0.9.4
+* The previous PEP257 hack was not compatible with older versions of pep257.
+
+## Version 0.9.3
+* The PEP257 tool sets a logging level of DEBUG globally when imported as of version 0.4.1, and this causes huge amounts of tokenzing debug to be output. Prospector now has a hacky workaround until that is fixed.
+* Extra profile information (mainly the shorthand information) is kept when parsing and serializing profiles.
+
+## Version 0.9.2
+* There were some problems related to absolute paths when loading profiles that were not in the current working directory.
+
+## Version 0.9.1
+* Mandating version 0.2.3 of pylint-plugin-utils, as the earlier ones don't work with the add_message API changes made in pylint 1.4+
+
+## Version 0.9
+* [#102](https://github.com/landscapeio/prospector/pull/102) By default, prospector will hide pylint's "no-member" warnings, because more often than not they are simply incorrect. They can be re-enabled with the '--member-warnings' command line flag or the 'member-warnings: true' profile option.
+* [#101](https://github.com/landscapeio/prospector/pull/101) Code annotated with pep8/flake8 style "# noqa" comments is now understood by prospector and will lead to messages from other tools being suppressed too.
+* [#100](https://github.com/landscapeio/prospector/pull/100) Pyflakes error codes have been replaced with the same as those used in flake8, for consistency. Profiles with the old values will still work, and the profile-validator will warn you to upgrade.
+* Messages now use Pylint error symbols ('star-args') instead of codes ('W0142'). This makes it much more obvious what each message means and what is happening when errors are suppressed or ignored in profiles. The old error codes will continue to work in profiles.
+* The way that profiles are handled and parsed has completely been rewritten to avoid several bugs and introduce 'shorthand' options to profiles. This allows profiles to specify simple options like 'doc-warnings: true' inside profiles and configure anything that can be configured as a command line argument. Profiles can now use options like 'strictness: high' or 'doc-warnings: true' as a shortcut for inheriting the built-in prospector profiles.
+* A new `--show-profile` option is available to dump the calculated profile, which is helpful for figuring out what prospector thinks it is doing.
+* Profiles now have separate `ignore-paths` and `ignore-patterns` directives to match the command line arguments. The old `ignore` directive remains in place for backwards compatibility and will be deprecated in the future.
+* A new tool, `profile-validator`, has been added. It simply checks prospector profiles and validates the settings, providing warnings if any are incorrect.
+* [#89](https://github.com/landscapeio/prospector/issues/89) and [#40](https://github.com/landscapeio/prospector/pull/40) - profile merging was not behaving exactly as intended, with later profiles not overriding earlier profiles. This is now fixed as part of the aforementioned rewrite.
+* pep257 is now included by default; however it will not run unless the '--doc-warnings' flag is used.
+* pep257 messages are now properly blended with other tools' documentation warnings
+* Path and output character encoding is now handled much better (which is to say, it is handled; previously it wasn't at all).
+
+## Version 0.8.3
+* [#96](https://github.com/landscapeio/prospector/issues/96) and [#97](https://github.com/landscapeio/prospector/issues/97) - disabling messages in profiles now works for pep8
 
 ## Version 0.8.2
 * Version loading in setup.py no longer imports the prospector module (which could lead to various weirdnesses when installing on different platforms)
@@ -20,7 +120,7 @@ Prospector Changelog
 * Removed the "adaptors" concept. This was a sort of visitor pattern in which each tool's configuration could be updated by an adaptor, which 'visited' the tool to tweak settings based on what the adaptor represented. In practise this was not useful and a confusing way to tweak behaviour - tools now configure themselves based on configuration options directly.
 * Changed the default output format to be 'grouped' rather than 'text'
 * Support for Python 2.6 has been dropped, following Pylint's lead.
-* Using pylint 1.4's 'unsafe' mode, which allows it to load any C extentions (this was the behaviour for 1.3 and below). Not loading them causes many many inference errors.
+* Using pylint 1.4's 'unsafe' mode, which allows it to load any C extensions (this was the behaviour for 1.3 and below). Not loading them causes many many inference errors.
 * [#65](https://github.com/landscapeio/prospector/issues/65) Resolve UnicodeDecodeErrors thrown while attempting to auto-discover modules of interest by discovering target python source file encoding (PEP263), and issuing only a warning if it fails (thanks to [Jeff Quast](https://github.com/jquast)).
 
 ## Version 0.7.3
@@ -37,7 +137,7 @@ Prospector Changelog
 ## Version 0.7.1
 
 * [#60](https://github.com/landscapeio/prospector/issues/60) Prospector did not work with Python2.6 due to timedelta.total_seconds() not being available.
-* Restored the behaviour where std_out/std_err from pylint is supressed
+* Restored the behaviour where std_out/std_err from pylint is suppressed
 
 ## Version 0.7
 
@@ -117,12 +217,12 @@ Prospector Changelog
 * Some additional bugs related to ignore paths were squashed.
 
 ## Version 0.5
- 
+
 * Files and paths can now be ignored using the `--ignore-paths` and `--ignore-patterns` arguments.
 
 * Full PEP8 compliance can be turned on using the `--full-pep8` flag, which overrides the defaults in the strictness profile.
 * The PEP8 tool will now use existing config if any is found in `.pep8`, `tox.ini`, `setup.cfg` in the path to check, or `~/.config/pep8`. These will override any other configuration specified by Prospector. If none are present, Prospector will fall back on the defaults specified by the strictness.
-* A new flag, `--external-config`, can be used to tweak how PEP8 treats external config. `only`, the default, means that external configuration will be preferred to Prospector configuration. `merge` means that Prospector will combine external configuration and its own 
+* A new flag, `--external-config`, can be used to tweak how PEP8 treats external config. `only`, the default, means that external configuration will be preferred to Prospector configuration. `merge` means that Prospector will combine external configuration and its own
 values. `none` means that Prospector will ignore external config.
 
 * The `--path` command line argument is no longer required, and Prospector can be called with `prospector path_to_check`.

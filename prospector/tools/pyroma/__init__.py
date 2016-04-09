@@ -1,7 +1,17 @@
+# -*- coding: utf-8 -*-
 import os
+import logging
 from prospector.message import Location, Message
 from prospector.tools.base import ToolBase
+
+# HACK: pyroma configures logging in its __init__.py so by importing,
+# it will change existing logging configuration to DEBUG which causes
+# problems with other 3rd party modules as everything now logs to
+# stdout...
+_old = logging.basicConfig
+logging.basicConfig = lambda **k: None
 from pyroma import projectdata, ratings
+logging.basicConfig = _old
 
 
 PYROMA_CODES = {
@@ -38,7 +48,6 @@ class PyromaTool(ToolBase):
 
     def configure(self, prospector_config, found_files):
         self.ignore_codes = prospector_config.get_disabled_messages('pyroma')
-        return None
 
     def run(self, found_files):
         messages = []

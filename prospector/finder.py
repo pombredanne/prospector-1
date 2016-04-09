@@ -1,13 +1,16 @@
 import os
+from prospector.pathutils import is_virtualenv
 
 
 class SingleFiles(object):
+
     """
     When prospector is run in 'single file mode' - that is,
     the argument is a python module rather than a directory -
     then we'll use this object instead of the FoundFiles to
     give all the functionality needed to check a single file.
     """
+
     # The 'even if ignored' parameters are kept to show this is meant
     # to be API compatible with FoundFiles, but pylint will warn, so
     # let's disable
@@ -135,43 +138,15 @@ class FoundFiles(object):
         return full_list
 
 
-def is_virtualenv(path):
-    if os.name == 'nt':
-        # Windows!
-        clues = ('Scripts', 'lib', 'include')
-    else:
-        clues = ('bin', 'lib', 'include')
-
-    dircontents = os.listdir(path)
-
-    if not all([clue in dircontents for clue in clues]):
-        # we don't have the 3 directories which would imply
-        # this is a virtualenvironment
-        return False
-
-    if not all([os.path.isdir(os.path.join(path, clue)) for clue in clues]):
-        # some of them are not actually directories
-        return False
-
-    # if we do have all three directories, make sure that it's not
-    # just a coincidence by doing some heuristics on the rest of
-    # the directory
-    if len(dircontents) > 7:
-        # if there are more than 7 things it's probably not a virtualenvironment
-        return False
-
-    return True
-
-
 def _find_paths(ignore, curpath, rootpath):
     files, modules, packages, directories = [], [], [], []
 
     for filename in os.listdir(curpath):
-        if filename.startswith('.'):
-            continue
-
         fullpath = os.path.join(curpath, filename)
         relpath = os.path.relpath(fullpath, rootpath)
+
+        if filename.startswith('.') and os.path.isdir(fullpath):
+            continue
 
         if os.path.islink(fullpath):
             continue

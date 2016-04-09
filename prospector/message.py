@@ -1,9 +1,16 @@
 import os
+import sys
 
 
 class Location(object):
 
     def __init__(self, path, module, function, line, character, absolute_path=True):
+        if sys.version_info.major == 2 and isinstance(path, str):
+            # If this is not a unicode object, make it one! Some tools return
+            # paths as unicode, some as bytestring, so to ensure that they are
+            # all the same, we normalise here. For Python3 this is (probably)
+            # always a str so no need to do anything.
+            path = path.decode(sys.getfilesystemencoding())
         self.path = path
         self._path_is_absolute = absolute_path
         self.module = module or None
@@ -41,7 +48,7 @@ class Location(object):
     def __lt__(self, other):
         if self.path == other.path:
             if self.line == other.line:
-                return self.character < other.character
+                return (self.character or -1) < (other.character or -1)
             return (self.line or -1) < (other.line or -1)  # line can be None if it a file-global warning
         return self.path < other.path
 

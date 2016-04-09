@@ -1,9 +1,8 @@
+# -*- coding: utf-8 -*-
 import setoptconf as soc
-
 from prospector.__pkginfo__ import __version__
 from prospector.formatters import FORMATTERS
-from prospector.tools import TOOLS, DEFAULT_TOOLS
-
+from prospector.tools import DEFAULT_TOOLS, TOOLS
 
 __all__ = (
     'build_manager',
@@ -21,10 +20,11 @@ def build_manager():
     manager.add(soc.BooleanSetting('blending', default=True))
     manager.add(soc.BooleanSetting('common_plugin', default=True))
 
-    manager.add(soc.BooleanSetting('doc_warnings', default=False))
-    manager.add(soc.BooleanSetting('test_warnings', default=False))
-    manager.add(soc.BooleanSetting('style_warnings', default=True))
-    manager.add(soc.BooleanSetting('full_pep8', default=False))
+    manager.add(soc.BooleanSetting('doc_warnings', default=None))
+    manager.add(soc.BooleanSetting('test_warnings', default=None))
+    manager.add(soc.BooleanSetting('no_style_warnings', default=None))
+    manager.add(soc.BooleanSetting('member_warnings', default=None))
+    manager.add(soc.BooleanSetting('full_pep8', default=None))
     manager.add(soc.IntegerSetting('max_line_length', default=None))
 
     manager.add(soc.BooleanSetting('messages_only', default=False))
@@ -48,8 +48,10 @@ def build_manager():
     manager.add(soc.ChoiceSetting(
         'strictness',
         ['veryhigh', 'high', 'medium', 'low', 'verylow'],
-        default='medium',
+        default=None,
     ))
+    manager.add(soc.BooleanSetting('show_profile', default=False))
+
     manager.add(soc.BooleanSetting('no_external_config', default=False))
     manager.add(soc.StringSetting('pylint_config_file', default=None))
 
@@ -59,6 +61,10 @@ def build_manager():
     manager.add(soc.ListSetting('ignore_paths', soc.String, default=[]))
 
     manager.add(soc.BooleanSetting('die_on_tool_error', default=False))
+    manager.add(soc.BooleanSetting('include_tool_stdout', default=False))
+    manager.add(soc.BooleanSetting('direct_tool_stdout', default=False))
+
+    # deprecated
     manager.add(soc.BooleanSetting('loquacious_pylint', default=False))
 
     return manager
@@ -108,7 +114,7 @@ def build_command_line_source(prog=None, description='Performs static analysis o
         'uses': {
             'flags': ['-u', '--uses'],
             'help': 'A list of one or more libraries or frameworks that the'
-                    ' project uses. Possible values are: django, celery. This will be'
+                    ' project uses. Possible values are: django, celery, flask. This will be'
                     ' autodetected by default, but if autodetection doesn\'t'
                     ' work, manually specify them using this flag.'
         },
@@ -130,10 +136,16 @@ def build_command_line_source(prog=None, description='Performs static analysis o
             'flags': ['-T', '--test-warnings'],
             'help': 'Also check test modules and packages.',
         },
-        'style_warnings': {
+        'no_style_warnings': {
             'flags': ['-8', '--no-style-warnings'],
             'help': 'Don\'t create any warnings about style. This disables the'
                     ' PEP8 tool and similar checks for formatting.',
+        },
+        'member_warnings': {
+            'flags': ['-m', '--member-warnings'],
+            'help': 'Attempt to warn when code tries to access an attribute of a '
+                    'class or member of a module which does not exist. This is disabled '
+                    'by default as it tends to be quite inaccurate.'
         },
         'full_pep8': {
             'flags': ['-F', '--full-pep8'],
@@ -163,15 +175,15 @@ def build_command_line_source(prog=None, description='Performs static analysis o
             ),
         },
         'absolute_paths': {
-            'help': 'Whether to output absolute paths when referencing files'
-                    'in messages. By default, paths will be relative to the'
+            'help': 'Whether to output absolute paths when referencing files '
+                    'in messages. By default, paths will be relative to the '
                     'project path',
         },
         'tools': {
             'flags': ['-t', '--tool'],
             'help': 'A list of tools to run. This lets you set exactly which '
                     'tools to run. To add extra tools to the defaults, see '
-                    '--extra-tool. Possible values are: %s. By '
+                    '--with-tool. Possible values are: %s. By '
                     'default, the following tools will be run: %s' % (
                         ', '.join(sorted(TOOLS.keys())),
                         ', '.join(sorted(DEFAULT_TOOLS)),
@@ -209,6 +221,14 @@ def build_command_line_source(prog=None, description='Performs static analysis o
             'help': 'Additional paths to search for profile files. By default this'
                     ' is the path that prospector will check, and a directory '
                     ' called ".prospector" in the path that prospector will check.',
+        },
+        'show_profile': {
+            'flags': ['--show-profile'],
+            'help': 'Include the computed profile in the summary. This will show what'
+                    ' prospector has decided the overall profile is once all profiles'
+                    ' have been combined and inherited from. This will produce a large'
+                    ' output in most cases so is only useful when trying to debug why'
+                    ' prospector is not behaving like you expect.',
         },
         'strictness': {
             'flags': ['-s', '--strictness'],
@@ -253,12 +273,22 @@ def build_command_line_source(prog=None, description='Performs static analysis o
                     ' exception the tool generated. Mostly useful for'
                     ' development on prospector.',
         },
+        'include-tool-stdout': {
+            'flags': ['--include-tool-stdout'],
+            'help': 'There are various places where tools will output warnings to '
+                    'stdout/stderr, which breaks parsing of JSON output. Therefore while tols '
+                    'is running, this is suppressed. For developing, it is sometimes useful to '
+                    'see this. This flag will cause stdout/stderr from a tool to be shown as '
+                    'a normal message amongst other warnings. See also --direct-tool-stdout'
+        },
+        'direct-tool-stdout': {
+            'flags': ['--direct-tool-stdout'],
+            'help': 'Same as --include-tool-stdout, except the output will be printed '
+                    'directly rather than shown as a message.'
+        },
         'loquacious_pylint': {
             'flags': ['--loquacious-pylint'],
-            'help': 'There are various places where pylint will randomly output warnings to '
-                    'stdout/stderr, which breaks parsing of JSON output. Therefore while pylint '
-                    'is running, this is suppressed. For developing, it is sometimes useful to '
-                    'allow this verbiage to appear, which this flag will do.'
+            'help': 'Deprecated - replaced by --include-tool-stdout'
         },
         'path': {
             'flags': ['-p', '--path'],

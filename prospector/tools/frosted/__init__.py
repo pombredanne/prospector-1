@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
 from frosted.api import check_path
@@ -16,7 +17,7 @@ class ProspectorReporter(object):
         self._messages = []
         self.ignore = ignore or ()
 
-    # pylint: disable=R0913
+    # pylint: disable=too-many-arguments
     def record_message(
             self,
             filename=None,
@@ -72,7 +73,6 @@ class FrostedTool(ToolBase):
 
     def configure(self, prospector_config, _):
         self.ignore_codes = prospector_config.get_disabled_messages('frosted')
-        return None
 
     def run(self, found_files):
         reporter = ProspectorReporter(ignore=self.ignore_codes)
