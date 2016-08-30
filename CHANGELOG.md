@@ -1,5 +1,20 @@
 Prospector Changelog
 =======
+
+# Version 0.12.1
+* Fixed a crash in the profile_validator tool if an empty profile was found
+* [#178](https://github.com/landscapeio/prospector/pull/178) Long paths no longer cause crash in Windows.
+* [#173](https://github.com/landscapeio/prospector/issues/154) Changed from using pep8 to pycodestyle (which is what pep8 was renamed to)
+* [#172](https://github.com/landscapeio/prospector/issues/172) Fixed non-ascii file handling for mccabe tool and simplified all python source file reading
+
+# Version 0.12
+* [#170](https://github.com/landscapeio/prospector/issues/170) Changed from using pep257 to pydocstyle (which is what pep257 is now called)
+* [#162](https://github.com/landscapeio/prospector/issues/162) Properly warning about optional tools which are not installed
+* [#166](https://github.com/landscapeio/prospector/pulls/166) Added vscode formater
+* [#153](https://github.com/landscapeio/prospector/pulls/153) Better pep257 support
+* [#156](https://github.com/landscapeio/prospector/pulls/156) Better pyroma logging hack for when pyroma is not installed
+* [#158](https://github.com/landscapeio/prospector/pulls/158) Fixed max-line-length command line option
+
 # Version 0.11.7
 * Wrapping all tools so that none can directly write to stdout/stderr, as this breaks the output format for things like json. Instead, it is captured and optionally included as a regular message.
 

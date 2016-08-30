@@ -8,6 +8,7 @@ from prospector.tools import ToolBase
 from prospector.tools import pyflakes
 
 
+PROFILE_IS_EMPTY = 'profile-is-empty'
 CONFIG_SETTING_SHOULD_BE_LIST = 'should-be-list'
 CONFIG_UNKNOWN_SETTING = 'unknown-setting'
 CONFIG_SETTING_MUST_BE_INTEGER = 'should-be-int'
@@ -28,7 +29,7 @@ class ProfileValidationTool(ToolBase):
         'output-format', 'doc-warnings', 'test-warnings', 'member-warnings',
         # bit of a grim hack; prospector does not use the following but Landscape does:
         # TODO: think of a better way to avoid Landscape-specific config leaking into prospector
-        'requirements',  'python-targets',
+        'requirements', 'python-targets',
     )
 
     def __init__(self):
@@ -68,6 +69,11 @@ class ProfileValidationTool(ToolBase):
             message = Message('profile-validator', code, location, message)
             messages.append(message)
 
+        if parsed is None:
+            # this happens if a completely empty profile is found
+            add_message(PROFILE_IS_EMPTY, "%s is a completely empty profile" % relative_filepath, 'entire-file')
+            return messages
+
         for setting in ('doc-warnings', 'test-warnings', 'autodetect'):
             if not isinstance(parsed.get(setting, False), bool):
                 add_message(CONFIG_SETTING_MUST_BE_BOOL, '"%s" should be true or false' % setting, setting)
@@ -102,8 +108,8 @@ class ProfileValidationTool(ToolBase):
             for target in python_targets:
                 if str(target) not in ('2', '3'):
                     add_message(CONFIG_INVALID_VALUE,
-                                '"%s" is not valid for "python-targets", must be either 2 or 3',
-                                target)
+                                '"%s" is not valid for "python-targets", must be either 2 or 3' % target,
+                                str(target))
 
         for pattern in parsed.get('ignore-patterns', []):
             try:
